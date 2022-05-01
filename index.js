@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors')
 const { MongoClient, ServerApiVersion } = require('mongodb');
+var jwt = require('jsonwebtoken');
 const port = 5000;
 require('dotenv').config();
 const app = express();
@@ -16,7 +17,29 @@ const run = async () => {
   try {
     await client.connect();
     const itemCollections = client.db('inventoryItems').collection('items')
-    itemCollections.insertOne({itemName: "oppo mobile", qty: 12})
+    
+    app.post('/login', async (req, res)=> {
+      const user = req.body;
+      const accessKey = jwt.sign(user, process.env.ACCESS_TOKEN);
+      res.send({ accessKey });
+    })
+
+    app.get('/items', async (req, res) => {
+      const query = {};
+      const cursor = itemCollections.find(query)
+      const item = await cursor.toArray();
+      res.send(item)
+    })
+
+    app.post('/items', async (req, res) => {
+      const newItem = req.body;
+      const item = await itemCollections.insertOne(newItem);
+      res.send(item)
+  })    
+
+
+
+
     console.log('DB connected')
   }
   finally {
