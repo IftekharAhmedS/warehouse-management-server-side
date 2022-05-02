@@ -14,7 +14,14 @@ function verifyToken(req, res, next){
   if(!authHeader){
     return res.status(401).send({message: 'Unauthorized Access'})
   }
-  next()
+  const key = authHeader.split(' ')[1];
+  jwt.verify(key, process.env.ACCESS_TOKEN, (error, decoded) => {
+    if(error){
+      return res.status(403).send({message: 'Access Forbidden'})
+    }
+    req.decoded = decoded;
+    next()
+  })
 }
 
 
@@ -33,10 +40,25 @@ const run = async () => {
     })
 
     app.get('/items', verifyToken , async (req, res) => {
+      const email = req.query.email;
+      console.log(email)
       const query = {};
       const cursor = itemCollections.find(query)
       const item = await cursor.toArray();
       res.send(item)
+    })
+    app.get('/filtered-items', verifyToken , async (req, res) => {
+      const email = req.query.email;
+      const decodedEmail = req.decoded.email;
+      if(email === decodedEmail){
+        const query = {email};
+        const cursor = itemCollections.find(query)
+        const item = await cursor.toArray();
+        res.send(item)
+      }
+      else{
+        res.status(403).send({message: 'Access Forbidden'})
+      }
     })
 
     app.post('/items', async (req, res) => {
