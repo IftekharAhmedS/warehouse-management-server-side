@@ -52,6 +52,12 @@ const run = async () => {
       const item = await itemCollections.findOne(query);
       res.send(item)
     })
+    app.delete('/items/:id', verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const item = await itemCollections.deleteOne(query);
+      res.send(item)
+    })
     app.get('/filtered-items', verifyToken , async (req, res) => {
       const email = req.query.email;
       const decodedEmail = req.decoded.email;
