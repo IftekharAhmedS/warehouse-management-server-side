@@ -44,7 +44,7 @@ const run = async () => {
 
     // Item API
 
-    app.get('/items', verifyToken , async (req, res) => {
+    app.get('/items', async (req, res) => {
       const email = req.query.email;
       const query = {};
       const cursor = itemCollections.find(query)
